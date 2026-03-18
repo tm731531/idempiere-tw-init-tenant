@@ -30,7 +30,6 @@ iDempiere 內建的 Garden World 示範資料是英文的，對台灣使用者�
 目標環境須已安裝：
 
 1. **iDempiere 12**（或相容版本）
-2. **idempiere-rest** REST API 插件（https://github.com/bxservice/idempiere-rest）
 
 ---
 
@@ -294,17 +293,20 @@ Sample (Client)
 tw.idempiere.sample/
 ├── src/
 │   └── tw/idempiere/sample/
-│       ├── Activator.java              # OSGi 生命週期
-│       ├── service/
-│       │   ├── SampleSetupService.java     # 初始化服務
-│       │   ├── SampleCleanupService.java   # 清理服務
-│       │   └── RestApiClient.java          # REST API 封裝
+│       ├── Activator.java                  # OSGi 生命週期
+│       ├── setup/
+│       │   ├── SampleClientSetup.java      # Client 初始化（類似 MSetup）
+│       │   ├── SampleOrgSetup.java         # 組織/倉庫設定
+│       │   ├── SampleAccountingSetup.java  # 會計架構設定
+│       │   └── SampleMasterDataSetup.java  # 主檔資料設定
+│       ├── cleanup/
+│       │   └── SampleClientCleanup.java    # 清理服務
 │       └── data/
-│           ├── ChartOfAccountsTW.java      # 台灣會計科目
+│           ├── ChartOfAccountsTW.java      # 台灣會計科目定義
 │           ├── OrganizationData.java       # 組織定義
 │           ├── ProductData.java            # 商品定義
 │           ├── BPartnerData.java           # BP 定義
-│           └── MasterData.java             # 其他主檔
+│           └── MasterData.java             # 其他主檔定義
 ├── META-INF/
 │   └── MANIFEST.MF
 ├── OSGI-INF/
@@ -323,7 +325,10 @@ public class Activator implements BundleActivator {
     @Override
     public void start(BundleContext context) {
         // 檢查 Sample Client 是否存在
-        // 不存在則呼叫 SampleSetupService.init()
+        MClient client = MClient.get(Env.getCtx(), "sample");
+        if (client == null) {
+            SampleClientSetup.init();
+        }
     }
 
     @Override
@@ -333,56 +338,205 @@ public class Activator implements BundleActivator {
 }
 ```
 
-#### SampleSetupService.java
-
-透過 REST API 建立資料：
-
-1. 登入取得 Token
-2. 建立 Client（呼叫 Initial Client Setup 或 Model API）
-3. 建立組織、倉庫
-4. 設定會計架構、帳期
-5. 建立 Product Category、BP Group
-6. 建立 BP
-7. 建立 Product
-8. 建立 Price List 和 Price
-9. 建立 BOM
-
-#### SampleCleanupService.java
-
-刪除資料（參考 Delete Client 插件）：
-
-1. 刪除交易資料（若有）
-2. 刪除 BOM
-3. 刪除 Product
-4. 刪除 BP
-5. 刪除 Price List
-6. 刪除組織、倉庫
-7. 刪除 Client
-8. 重置序號
-
-#### RestApiClient.java
-
-封裝 REST API 呼叫：
-
-- `login()`：取得 JWT Token
-- `post(endpoint, data)`：建立資料
-- `get(endpoint)`：查詢資料
-- `delete(endpoint)`：刪除資料
-
-### 8.3 REST API 呼叫範例
-
+需要註冊 uninstall hook 來處理清理：
+```java
+context.addBundleListener(event -> {
+    if (event.getType() == BundleEvent.UNINSTALLED) {
+        SampleClientCleanup.cleanup();
+    }
+});
 ```
-POST /api/v1/auth/tokens
-    → 取得 Token
 
-POST /api/v1/models/M_Product
-    → 建立商品
+#### SampleClientSetup.java
 
-POST /api/v1/models/C_BPartner
-    → 建立 BP
+使用 Model API 建立 Client，參考 `org.compiere.model.MSetup`：
 
-DELETE /api/v1/models/AD_Client/{id}
-    → 刪除 Client（若 API 支援）
+```java
+public class SampleClientSetup {
+
+    public static void init() {
+        // 1. 建立 Client
+        MClient client = new MClient(Env.getCtx(), 0, null);
+        client.setValue("sample");
+        client.setName("Sample");
+        client.saveEx();
+
+        // 2. 建立 Organization
+        SampleOrgSetup.createOrganizations(client);
+
+        // 3. 設定會計架構
+        SampleAccountingSetup.setup(client);
+
+        // 4. 建立主檔資料
+        SampleMasterDataSetup.createAll(client);
+    }
+}
+```
+
+#### SampleAccountingSetup.java
+
+使用 Model API 建立會計架構：
+
+```java
+public class SampleAccountingSetup {
+
+    public static void setup(MClient client) {
+        // 1. 建立 Calendar 和 Period
+        MCalendar calendar = new MCalendar(client);
+        calendar.setName("Sample 會計年度");
+        calendar.saveEx();
+        createPeriods(calendar);  // 建立 12 個月帳期
+
+        // 2. 建立 Element（科目表）
+        MElement element = new MElement(client, "台灣會計科目");
+        element.saveEx();
+
+        // 3. 建立 ElementValue（各科目）
+        ChartOfAccountsTW.createAccounts(element);
+
+        // 4. 建立 Accounting Schema
+        MAcctSchema as = new MAcctSchema(client, "Sample 會計架構");
+        as.setC_Currency_ID(TWD_CURRENCY_ID);
+        as.setCostingMethod(MAcctSchema.COSTINGMETHOD_AveragePO);
+        as.setAutoPeriodControl(false);
+        as.saveEx();
+
+        // 5. 設定 Default Accounts
+        setupDefaultAccounts(as);
+    }
+}
+```
+
+#### SampleMasterDataSetup.java
+
+使用 Model API 建立主檔：
+
+```java
+public class SampleMasterDataSetup {
+
+    public static void createAll(MClient client) {
+        // 1. Product Category
+        createProductCategories(client);
+
+        // 2. BP Group
+        createBPGroups(client);
+
+        // 3. Tax
+        createTax(client);
+
+        // 4. Payment Term
+        createPaymentTerms(client);
+
+        // 5. Price List
+        MPriceList salesPL = createPriceList(client, "標準售價", true);
+        MPriceList purchasePL = createPriceList(client, "標準進價", false);
+
+        // 6. Business Partners
+        BPartnerData.createAll(client);
+
+        // 7. Products
+        ProductData.createAll(client, salesPL, purchasePL);
+
+        // 8. BOM
+        ProductData.createBOMs(client);
+    }
+}
+```
+
+#### SampleClientCleanup.java
+
+清理資料（參考 Delete Client 插件）：
+
+```java
+public class SampleClientCleanup {
+
+    public static void cleanup() {
+        MClient client = MClient.get(Env.getCtx(), "sample");
+        if (client == null) return;
+
+        int clientId = client.getAD_Client_ID();
+
+        // 1. 刪除交易資料（若有）
+        deleteTransactions(clientId);
+
+        // 2. 刪除 BOM
+        deleteBOMs(clientId);
+
+        // 3. 刪除 Product Price
+        deleteProductPrices(clientId);
+
+        // 4. 刪除 Product
+        deleteProducts(clientId);
+
+        // 5. 刪除 BP
+        deleteBPartners(clientId);
+
+        // 6. 刪除 Price List
+        deletePriceLists(clientId);
+
+        // 7. 刪除會計架構
+        deleteAccountingSchema(clientId);
+
+        // 8. 刪除組織、倉庫
+        deleteOrganizations(clientId);
+
+        // 9. 刪除 Client
+        client.deleteEx(true);
+
+        // 10. 重置序號（可選）
+        resetSequences(clientId);
+    }
+}
+```
+
+### 8.3 Model API 使用範例
+
+#### 建立商品
+
+```java
+MProduct product = new MProduct(Env.getCtx(), 0, null);
+product.setAD_Org_ID(0);  // 共用組織
+product.setValue("PEN-BLUE");
+product.setName("原子筆-藍");
+product.setProductType(MProduct.PRODUCTTYPE_Item);
+product.setM_Product_Category_ID(categoryId);
+product.setC_UOM_ID(uomId);
+product.setC_TaxCategory_ID(taxCategoryId);
+product.saveEx();
+```
+
+#### 建立 Business Partner
+
+```java
+MBPartner bp = new MBPartner(Env.getCtx(), 0, null);
+bp.setValue("ESLITE");
+bp.setName("誠品書店");
+bp.setIsCustomer(true);
+bp.setIsVendor(false);
+bp.setC_BP_Group_ID(customerGroupId);
+bp.saveEx();
+```
+
+#### 建立 BOM
+
+```java
+// 母件
+MProduct bomProduct = MProduct.get(Env.getCtx(), "BOM-GIFT-SET");
+bomProduct.setIsBOM(true);
+bomProduct.saveEx();
+
+// 子件
+MPPProductBOM bom = new MPPProductBOM(Env.getCtx(), 0, null);
+bom.setM_Product_ID(bomProduct.getM_Product_ID());
+bom.setName("文具禮盒組 BOM");
+bom.setBOMType(MPPProductBOM.BOMTYPE_CurrentActive);
+bom.saveEx();
+
+// BOM Line
+MPPProductBOMLine line = new MPPProductBOMLine(bom);
+line.setM_Product_ID(penBlueId);
+line.setQtyBOM(Env.ONE);
+line.saveEx();
 ```
 
 ---
@@ -418,10 +572,15 @@ DELETE /api/v1/models/AD_Client/{id}
 
 ```java
 // 範例：檢查 Client 是否存在
-GET /api/v1/models/AD_Client?$filter=Value eq 'sample'
+public static boolean clientExists() {
+    String sql = "SELECT AD_Client_ID FROM AD_Client WHERE Value = ?";
+    int clientId = DB.getSQLValue(null, sql, "sample");
+    return clientId > 0;
+}
 
-if (exists) {
-    log("Sample Client 已存在，跳過初始化");
+// 在 Activator.start() 中使用
+if (clientExists()) {
+    log.info("Sample Client 已存在，跳過初始化");
     return;
 }
 ```
@@ -432,9 +591,26 @@ if (exists) {
 
 | 情境 | 處理方式 |
 |------|----------|
-| REST API 插件未安裝 | 記錄錯誤，不建立資料 |
-| API 呼叫失敗 | 記錄錯誤，rollback 已建立的資料 |
+| Client 已存在 | 記錄訊息，跳過初始化 |
+| 建立失敗 | 使用 Transaction rollback，記錄錯誤 |
 | 部分資料建立失敗 | 記錄錯誤，繼續嘗試其他資料 |
+| 清理時 FK 衝突 | 先刪除相依資料，或記錄錯誤提示用戶 |
+
+### 11.1 Transaction 管理
+
+```java
+String trxName = Trx.createTrxName("SampleSetup");
+Trx trx = Trx.get(trxName, true);
+try {
+    // 建立資料...
+    trx.commit();
+} catch (Exception e) {
+    trx.rollback();
+    log.severe("Sample 資料建立失敗: " + e.getMessage());
+} finally {
+    trx.close();
+}
+```
 
 ---
 
@@ -447,9 +623,10 @@ if (exists) {
 
 ---
 
-## 附錄 A：相依插件
+## 附錄 A：參考資源
 
-| 插件 | 用途 | 連結 |
+| 資源 | 說明 | 連結 |
 |------|------|------|
-| idempiere-rest | REST API | https://github.com/bxservice/idempiere-rest |
-| Delete Client | 清理 Client（參考） | https://wiki.idempiere.org/en/Plugin:_Delete_Client_and_Initialize_Client |
+| MSetup.java | iDempiere Initial Client Setup 原始碼 | org.compiere.model.MSetup |
+| Delete Client 插件 | 清理 Client 邏輯參考 | https://wiki.idempiere.org/en/Plugin:_Delete_Client_and_Initialize_Client |
+| idempiere-rest | REST API 插件（可選用於檢查） | https://github.com/bxservice/idempiere-rest |
