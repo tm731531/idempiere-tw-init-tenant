@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+    DS Component 定義
+    注意：實際的 lifecycle 管理由 BundleActivator (start/stop) 處理，
+    此檔案僅作為 DS 服務註冊使用。
+-->
 <scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.4.0"
                name="tw.idempiere.sample"
-               activate="activate"
-               deactivate="deactivate">
+               immediate="true">
     <implementation class="tw.idempiere.sample.Activator"/>
 </scr:component>
