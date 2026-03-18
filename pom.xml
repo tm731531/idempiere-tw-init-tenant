@@ -6,7 +6,7 @@
 
     <groupId>tw.idempiere</groupId>
     <artifactId>tw.idempiere.sample</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.0-20260319023036</version>
     <packaging>jar</packaging>
 
     <name>iDempiere Taiwan Sample Client</name>
@@ -16,13 +16,13 @@
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <idempiere.version>12.0.0</idempiere.version>
+        <idempiere.version>12.0.0-SNAPSHOT</idempiere.version>
     </properties>
 
     <dependencies>
         <dependency>
             <groupId>org.idempiere</groupId>
-            <artifactId>org.idempiere.base</artifactId>
+            <artifactId>org.adempiere.base</artifactId>
             <version>${idempiere.version}</version>
             <scope>provided</scope>
         </dependency>
@@ -42,6 +42,22 @@
 
     <build>
         <sourceDirectory>src</sourceDirectory>
+        <resources>
+            <!-- 包含 OSGI-INF 目錄（DS 元件定義） -->
+            <resource>
+                <directory>${project.basedir}</directory>
+                <includes>
+                    <include>OSGI-INF/**</include>
+                </includes>
+            </resource>
+            <!-- 包含 data 目錄（會計科目表等資料檔案） -->
+            <resource>
+                <directory>${project.basedir}</directory>
+                <includes>
+                    <include>data/**</include>
+                </includes>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

@@ -11,6 +11,7 @@ import java.util.Properties;
 import org.compiere.model.MTax;
 import org.compiere.model.MTaxCategory;
 import org.compiere.util.CLogger;
+import org.compiere.util.DB;
 
 /**
  * 稅務設定建立
@@ -139,12 +140,21 @@ public class SampleTaxSetup {
     private static MTaxCategory createTaxCategory(Properties ctx, int clientId, String trxName) {
         log.info("建立稅務類別: " + TAX_CATEGORY_NAME);
 
+        // 檢查是否已存在
+        int existingId = DB.getSQLValue(trxName,
+            "SELECT C_TaxCategory_ID FROM C_TaxCategory WHERE AD_Client_ID=? AND Name=?",
+            clientId, TAX_CATEGORY_NAME);
+
+        if (existingId > 0) {
+            log.info("稅務類別已存在，使用現有的: " + TAX_CATEGORY_NAME);
+            return new MTaxCategory(ctx, existingId, trxName);
+        }
+
         MTaxCategory taxCategory = new MTaxCategory(ctx, 0, trxName);
-        taxCategory.setAD_Client_ID(clientId);
-        taxCategory.setAD_Org_ID(0); // 稅務類別設定在 Client 層級
+        taxCategory.setAD_Org_ID(0);
         taxCategory.setName(TAX_CATEGORY_NAME);
         taxCategory.setDescription("台灣加值型營業稅類別");
-        taxCategory.setIsDefault(true); // 設為預設稅務類別
+        taxCategory.setIsDefault(true);
 
         if (!taxCategory.save()) {
             log.severe("無法儲存稅務類別");
@@ -181,7 +191,6 @@ public class SampleTaxSetup {
         log.info("建立稅率: " + name + " (" + rate + "%)");
 
         MTax tax = new MTax(ctx, 0, trxName);
-        tax.setAD_Client_ID(clientId);
         tax.setAD_Org_ID(0); // 稅率設定在 Client 層級
         tax.setName(name);
         tax.setDescription(name + " - 台灣營業稅");

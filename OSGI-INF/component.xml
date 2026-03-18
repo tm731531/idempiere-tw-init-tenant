@@ -1,11 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
     DS Component 定義
-    注意：實際的 lifecycle 管理由 BundleActivator (start/stop) 處理，
-    此檔案僅作為 DS 服務註冊使用。
+    包含 SampleDataInitializer 元件，用於在 iDempiere 環境就緒後執行初始化。
 -->
-<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.4.0"
-               name="tw.idempiere.sample"
-               immediate="true">
-    <implementation class="tw.idempiere.sample.Activator"/>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.3.0"
+               name="tw.idempiere.sample.initializer"
+               immediate="true"
+               activate="activate"
+               deactivate="deactivate">
+    <implementation class="tw.idempiere.sample.SampleDataInitializer"/>
+    <service>
+        <provide interface="tw.idempiere.sample.SampleDataInitializer"/>
+    </service>
 </scr:component>

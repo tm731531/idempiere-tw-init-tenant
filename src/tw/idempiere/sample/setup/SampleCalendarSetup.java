@@ -64,7 +64,6 @@ public class SampleCalendarSetup {
 
             // 建立會計年度曆 (MCalendar)
             MCalendar calendar = new MCalendar(ctx, 0, trxName);
-            calendar.setAD_Client_ID(clientId);
             calendar.setAD_Org_ID(orgId);
             calendar.setName(CALENDAR_NAME);
             calendar.setDescription("天地人實業有限公司會計年度曆");
@@ -161,12 +160,10 @@ public class SampleCalendarSetup {
             endCal.set(Calendar.DAY_OF_MONTH, endCal.getActualMaximum(Calendar.DAY_OF_MONTH));
             Timestamp endDate = new Timestamp(endCal.getTimeInMillis());
 
-            // 建立帳期
-            MPeriod period = new MPeriod(year, month + 1, startDate, endDate);
-            period.setAD_Client_ID(clientId);
+            // 建立帳期（使用 5 參數構造函數）
+            String periodName = yearValue + " " + monthNames[month];
+            MPeriod period = new MPeriod(year, month + 1, periodName, startDate, endDate);
             period.setAD_Org_ID(orgId);
-            period.setName(yearValue + " " + monthNames[month]);
-            period.setPeriodNo(month + 1);
 
             if (!period.save()) {
                 log.severe("無法建立帳期: " + monthNames[month]);

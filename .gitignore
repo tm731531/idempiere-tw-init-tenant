@@ -1,0 +1,16 @@
+# Build output
+target/
+bin/
+
+# IDE
+.classpath
+.project
+.settings/
+
+# Temp files
+*.log
+log_result.txt
+
+# Local scripts
+query_log.bat
+query_log.sql
