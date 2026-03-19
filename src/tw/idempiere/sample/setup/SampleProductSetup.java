@@ -300,29 +300,40 @@ public class SampleProductSetup {
         for (String symbol : uomSymbols) {
             String name = uomNames.getOrDefault(symbol, symbol);
 
-            // 先查詢系統級別的 UOM（AD_Client_ID = 0）或當前 Client 的 UOM
-            String sql = "SELECT C_UOM_ID FROM C_UOM WHERE (AD_Client_ID = 0 OR AD_Client_ID = ?) AND (UOMSymbol = ? OR X12DE355 = ? OR Name = ?)";
-            int uomId = DB.getSQLValue(trxName, sql, clientId, symbol, symbol, name);
+            // 優先查詢系統級別的 UOM（AD_Client_ID = 0），使用無交易以確保能看到剛建立的
+            String sql = "SELECT C_UOM_ID FROM C_UOM WHERE AD_Client_ID = 0 AND (UOMSymbol = ? OR X12DE355 = ? OR Name = ?)";
+            int uomId = DB.getSQLValue(null, sql, symbol, symbol, name);
 
             if (uomId <= 0) {
-                // 建立新 UOM
-                MUOM uom = new MUOM(ctx, 0, trxName);
-                uom.setAD_Org_ID(0);
-                uom.setUOMSymbol(symbol);
-                uom.setX12DE355(symbol);
-                uom.setName(name);
+                // 建立新 UOM（使用系統級別 AD_Client_ID=0，無交易以確保立即可見）
+                // 保存原始 context 值
+                int originalClientId = Env.getAD_Client_ID(ctx);
 
-                if (!uom.save()) {
-                    log.warning("無法儲存 UOM: " + name + "，使用系統預設 EA");
-                    // 使用系統預設的 EA
-                    uomId = DB.getSQLValue(trxName, "SELECT C_UOM_ID FROM C_UOM WHERE X12DE355 = 'EA'");
-                    if (uomId <= 0) {
-                        log.severe("找不到系統預設 UOM (EA)");
-                        return false;
+                try {
+                    // 設定為系統級別
+                    Env.setContext(ctx, Env.AD_CLIENT_ID, 0);
+
+                    MUOM uom = new MUOM(ctx, 0, null);  // 使用 null 交易，立即提交
+                    uom.setAD_Org_ID(0);
+                    uom.setUOMSymbol(symbol);
+                    uom.setX12DE355(symbol);
+                    uom.setName(name);
+
+                    if (!uom.save()) {
+                        log.warning("無法儲存 UOM: " + name + "，使用系統預設 EA");
+                        // 使用系統預設的 EA
+                        uomId = DB.getSQLValue(null, "SELECT C_UOM_ID FROM C_UOM WHERE X12DE355 = 'EA'");
+                        if (uomId <= 0) {
+                            log.severe("找不到系統預設 UOM (EA)");
+                            return false;
+                        }
+                    } else {
+                        uomId = uom.getC_UOM_ID();
+                        log.fine("已建立系統級 UOM: " + symbol + " - " + name + " (ID=" + uomId + ")");
                     }
-                } else {
-                    uomId = uom.getC_UOM_ID();
-                    log.fine("已建立 UOM: " + symbol + " - " + name);
+                } finally {
+                    // 恢復原始 context
+                    Env.setContext(ctx, Env.AD_CLIENT_ID, originalClientId);
                 }
             } else {
                 log.fine("使用現有 UOM: " + symbol);
