@@ -410,7 +410,10 @@ public class SampleClientSetup {
                     int evTotal = DB.getSQLValue(null,
                         "SELECT COUNT(*) FROM C_ElementValue WHERE AD_Client_ID=?", newClientId);
                     int evTaiwan = DB.getSQLValue(null,
-                        "SELECT COUNT(*) FROM C_ElementValue WHERE AD_Client_ID=? AND Value ~ '^[1-8]'", newClientId);
+                        "SELECT COUNT(*) FROM C_ElementValue WHERE AD_Client_ID=? " +
+                        "AND (Value LIKE '1%' OR Value LIKE '2%' OR Value LIKE '3%' " +
+                        "OR Value LIKE '4%' OR Value LIKE '5%' OR Value LIKE '6%' " +
+                        "OR Value LIKE '7%' OR Value LIKE '8%')", newClientId);
                     SetupLog.log("驗證-會計科目", "C_ElementValue 總數: " + evTotal + ", 台灣會科(1-8開頭): " + evTaiwan + " (預期: 111)");
 
                     // 5. ValidCombination 驗證

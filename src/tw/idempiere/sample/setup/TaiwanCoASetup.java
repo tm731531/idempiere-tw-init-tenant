@@ -16,6 +16,7 @@ import java.util.Properties;
 
 import org.compiere.model.MProcess;
 import org.compiere.model.MPInstance;
+import org.compiere.model.MPInstancePara;
 import org.compiere.model.X_I_ElementValue;
 import org.compiere.process.ProcessInfo;
 import org.compiere.process.ProcessInfoParameter;
@@ -380,7 +381,8 @@ public class TaiwanCoASetup {
             pi.setAD_User_ID(0);
             pi.setAD_PInstance_ID(pInstanceId);
 
-            // 設定流程參數
+            // 設定流程參數（使用 MPInstancePara 正確儲存）
+            // 注意：Boolean 參數在 iDempiere 中使用 "Y"/"N" 字串
             ProcessInfoParameter[] params = new ProcessInfoParameter[] {
                 new ProcessInfoParameter("AD_Client_ID", new BigDecimal(clientId), null, null, null),
                 new ProcessInfoParameter("C_Element_ID", new BigDecimal(elementId), null, null, null),
@@ -390,28 +392,21 @@ public class TaiwanCoASetup {
             };
             pi.setParameter(params);
 
-            // 儲存參數到資料庫
+            // 使用 MPInstancePara 正確儲存參數（修正 SeqNo 遞增問題）
+            int seqNo = 10;
             for (ProcessInfoParameter param : params) {
-                // 插入 AD_PInstance_Para
-                String sql = "INSERT INTO AD_PInstance_Para " +
-                    "(AD_PInstance_ID, SeqNo, ParameterName, P_String, P_Number, " +
-                    "AD_Client_ID, AD_Org_ID, IsActive, Created, CreatedBy, Updated, UpdatedBy) " +
-                    "VALUES (?, ?, ?, ?, ?, ?, 0, 'Y', NOW(), 0, NOW(), 0)";
+                MPInstancePara para = new MPInstancePara(instance, seqNo);
+                para.setParameterName(param.getParameterName());
 
                 Object pValue = param.getParameter();
-                String pString = null;
-                BigDecimal pNumber = null;
-
                 if (pValue instanceof String) {
-                    pString = (String) pValue;
+                    para.setP_String((String) pValue);
                 } else if (pValue instanceof BigDecimal) {
-                    pNumber = (BigDecimal) pValue;
+                    para.setP_Number((BigDecimal) pValue);
                 }
 
-                DB.executeUpdate(sql,
-                    new Object[]{pInstanceId, params.length, param.getParameterName(),
-                        pString, pNumber, clientId},
-                    false, trxName);
+                para.saveEx();
+                seqNo += 10;  // 遞增 SeqNo
             }
 
             // 執行流程
@@ -444,9 +439,12 @@ public class TaiwanCoASetup {
                 "SELECT COUNT(*) FROM I_ElementValue WHERE AD_Client_ID=? AND I_IsImported='Y'",
                 clientId);
 
-            // 檢查 C_ElementValue 中的科目數量
+            // 檢查 C_ElementValue 中的科目數量（使用跨資料庫相容語法）
             int evCount = DB.getSQLValue(null,
-                "SELECT COUNT(*) FROM C_ElementValue WHERE AD_Client_ID=? AND Value ~ '^[1-8]'",
+                "SELECT COUNT(*) FROM C_ElementValue WHERE AD_Client_ID=? " +
+                "AND (Value LIKE '1%' OR Value LIKE '2%' OR Value LIKE '3%' " +
+                "OR Value LIKE '4%' OR Value LIKE '5%' OR Value LIKE '6%' " +
+                "OR Value LIKE '7%' OR Value LIKE '8%')",
                 clientId);
 
             // 檢查有階層關係的科目數量
