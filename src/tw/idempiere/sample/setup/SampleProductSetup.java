@@ -70,6 +70,9 @@ public class SampleProductSetup {
         // 工具類別，不需要實例化
     }
 
+    /** Standard 價格表版本（MSetup 自動建立的） */
+    private static MPriceListVersion standardPLV;
+
     /**
      * 建立所有商品
      * <p>
@@ -105,6 +108,10 @@ public class SampleProductSetup {
         taxCategoryId = taxCatId;
         salesPLV = salesPriceListVersion;
         purchasePLV = purchasePriceListVersion;
+
+        // 取得 MSetup 自動建立的 Standard 價格表版本
+        // 這是為了讓所有商品都有價格，避免 MInventoryLine 驗證失敗
+        standardPLV = getStandardPriceListVersion(ctx, clientId, trxName);
 
         try {
             // 步驟 1：建立商品類別
@@ -408,6 +415,15 @@ public class SampleProductSetup {
             createProductPrice(product, purchasePLV, purchasePrice, trxName);
         }
 
+        // 也加到 Standard 價格表（避免 MInventoryLine 驗證失敗）
+        if (standardPLV != null) {
+            // 使用銷售價格或採購價格（優先使用銷售價格）
+            java.math.BigDecimal stdPrice = salesPrice != null ? salesPrice : purchasePrice;
+            if (stdPrice != null) {
+                createProductPrice(product, standardPLV, stdPrice, trxName);
+            }
+        }
+
         productMap.put(value, product);
         log.fine("已建立商品: " + value + " - " + name);
         return product;
@@ -539,5 +555,37 @@ public class SampleProductSetup {
      */
     public static int getProductCount() {
         return productMap.size();
+    }
+
+    /**
+     * 取得 MSetup 自動建立的 Standard 價格表版本
+     * <p>
+     * MSetup 在建立 Client 時會自動建立名為 "Standard" 的價格表。
+     * 為了讓所有商品都能通過 MInventoryLine 等模組的價格表驗證，
+     * 需要將商品也加到這個價格表中。
+     * </p>
+     *
+     * @param ctx 系統上下文
+     * @param clientId Client ID
+     * @param trxName 交易名稱
+     * @return Standard 價格表版本，找不到時回傳 null
+     */
+    private static MPriceListVersion getStandardPriceListVersion(Properties ctx, int clientId, String trxName) {
+        // 查詢 Standard 價格表的版本
+        String sql = "SELECT plv.M_PriceList_Version_ID " +
+            "FROM M_PriceList_Version plv " +
+            "JOIN M_PriceList pl ON plv.M_PriceList_ID = pl.M_PriceList_ID " +
+            "WHERE pl.AD_Client_ID = ? AND pl.Name = 'Standard' " +
+            "ORDER BY plv.ValidFrom DESC";
+
+        int plvId = DB.getSQLValue(trxName, sql, clientId);
+
+        if (plvId > 0) {
+            log.info("找到 Standard 價格表版本: " + plvId);
+            return new MPriceListVersion(ctx, plvId, trxName);
+        }
+
+        log.fine("未找到 Standard 價格表版本");
+        return null;
     }
 }
