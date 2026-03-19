@@ -1,0 +1,112 @@
+[Account_Value],[Account_Name],[Account_Description],[Account_Type],[Account_Sign],[Account_Document],[Account_Summary],[Default_Account],[Account_Parent]
+1,資產,資產類科目,Asset,,,Yes,,
+11,流動資產,流動資產類,Asset,,,Yes,,1
+111,現金及約當現金,現金及約當現金類,Asset,,,Yes,,11
+1111,庫存現金,庫存現金,Asset,Debit,Yes,,,111
+1112,零用金,零用金 - CB_ASSET_ACCT,Asset,Debit,Yes,,CB_ASSET_ACCT,111
+1113,銀行存款,銀行存款 - B_ASSET_ACCT,Asset,Debit,Yes,,B_ASSET_ACCT,111
+1114,在途現金,在途現金 - B_INTRANSIT_ACCT,Asset,Debit,Yes,,B_INTRANSIT_ACCT,111
+112,短期投資,短期投資類,Asset,,,Yes,,11
+1121,短期投資-股票,短期投資-股票,Asset,Debit,Yes,,,112
+113,應收票據,應收票據類,Asset,,,Yes,,11
+1131,應收票據,應收票據,Asset,Debit,Yes,,,113
+114,應收帳款,應收帳款類,Asset,,,Yes,,11
+1141,應收帳款,應收帳款-貿易 - C_RECEIVABLE_ACCT,Asset,Debit,Yes,,C_RECEIVABLE_ACCT,114
+1142,應收帳款-關係人,應收帳款-關係人,Asset,Debit,Yes,,,114
+1149,備抵呆帳-應收帳款,備抵呆帳-應收帳款,Asset,Debit,Yes,,,114
+118,其他應收款,其他應收款類,Asset,,,Yes,,11
+1181,應收利息,應收利息,Asset,Debit,Yes,,,118
+1182,應收股利,應收股利,Asset,Debit,Yes,,,118
+1184,預付款項,預付款項 - V_PREPAYMENT_ACCT,Asset,Debit,Yes,,V_PREPAYMENT_ACCT,118
+1185,進項稅額,進項稅額 - T_CREDIT_ACCT,Asset,Debit,Yes,,T_CREDIT_ACCT,118
+1189,其他應收款-其他,其他應收款-其他,Asset,Debit,Yes,,,118
+119,存貨,存貨類,Asset,,,Yes,,11
+1191,商品存貨,商品存貨 - P_ASSET_ACCT,Asset,Debit,Yes,,P_ASSET_ACCT,119
+1192,原物料,原物料 - P_FLOORSTOCK_ACCT,Asset,Debit,Yes,,P_FLOORSTOCK_ACCT,119
+1193,在製品,在製品 - P_WIP_ACCT,Asset,Debit,Yes,,P_WIP_ACCT,119
+1194,製成品,製成品,Asset,Debit,Yes,,,119
+1195,存貨跌價準備,存貨跌價準備,Asset,Debit,Yes,,,119
+12,非流動資產,非流動資產類,Asset,,,Yes,,1
+121,固定資產,固定資產類,Asset,,,Yes,,12
+1211,土地,土地,Asset,Debit,Yes,,,121
+1212,房屋及建築,房屋及建築,Asset,Debit,Yes,,,121
+1213,機器設備,機器設備,Asset,Debit,Yes,,,121
+1214,運輸設備,運輸設備,Asset,Debit,Yes,,,121
+1215,辦公設備,辦公設備,Asset,Debit,Yes,,,121
+1219,累計折舊,累計折舊,Asset,Debit,Yes,,,121
+2,負債,負債類科目,Liability,,,Yes,,
+21,流動負債,流動負債類,Liability,,,Yes,,2
+211,短期借款,短期借款類,Liability,,,Yes,,21
+2111,短期借款,短期借款,Liability,Credit,Yes,,,211
+212,應付票據,應付票據類,Liability,,,Yes,,21
+2121,應付票據,應付票據,Liability,Credit,Yes,,,212
+213,應付帳款,應付帳款類,Liability,,,Yes,,21
+2131,應付帳款,應付帳款 - V_LIABILITY_ACCT,Liability,Credit,Yes,,V_LIABILITY_ACCT,213
+2132,應付帳款-關係人,應付帳款-關係人,Liability,Credit,Yes,,,213
+214,其他應付款,其他應付款類,Liability,,,Yes,,21
+2141,應付費用,應付費用,Liability,Credit,Yes,,,214
+2142,應付薪資,應付薪資,Liability,Credit,Yes,,,214
+2143,應付利息,應付利息,Liability,Credit,Yes,,,214
+2144,銷項稅額,銷項稅額 - T_DUE_ACCT,Liability,Credit,Yes,,T_DUE_ACCT,214
+2145,預收款項,預收款項 - C_PREPAYMENT_ACCT,Liability,Credit,Yes,,C_PREPAYMENT_ACCT,214
+2149,其他應付款-其他,其他應付款-其他,Liability,Credit,Yes,,,214
+3,權益,權益類科目,Owner's Equity,,,Yes,,
+31,股本,股本類,Owner's Equity,,,Yes,,3
+3111,普通股股本,普通股股本,Owner's Equity,Credit,Yes,,,31
+32,資本公積,資本公積類,Owner's Equity,,,Yes,,3
+3211,資本公積-股票溢價,資本公積-股票溢價,Owner's Equity,Credit,Yes,,,32
+33,保留盈餘,保留盈餘類,Owner's Equity,,,Yes,,3
+3311,法定盈餘公積,法定盈餘公積,Owner's Equity,Credit,Yes,,,33
+3312,特別盈餘公積,特別盈餘公積,Owner's Equity,Credit,Yes,,,33
+3321,未分配盈餘,未分配盈餘 - RETAINEDEARNING_ACCT,Owner's Equity,Credit,Yes,,RETAINEDEARNING_ACCT,33
+3322,本期損益,本期損益 - INCOMESUMMARY_ACCT,Owner's Equity,Credit,Yes,,INCOMESUMMARY_ACCT,33
+4,營業收入,營業收入類科目,Revenue,,,Yes,,
+41,銷貨收入,銷貨收入類,Revenue,,,Yes,,4
+4111,銷貨收入,銷貨收入 - P_REVENUE_ACCT,Revenue,Credit,Yes,,P_REVENUE_ACCT,41
+4112,銷貨退回,銷貨退回,Revenue,Credit,Yes,,,41
+4113,銷貨折讓,銷貨折讓 - P_TRADEDISCOUNTGRANT_ACCT,Revenue,Credit,Yes,,P_TRADEDISCOUNTGRANT_ACCT,41
+42,服務收入,服務收入類,Revenue,,,Yes,,4
+4211,服務收入,服務收入,Revenue,Credit,Yes,,,42
+5,營業成本,營業成本類科目,Expense,,,Yes,,
+51,銷貨成本,銷貨成本類,Expense,,,Yes,,5
+5111,銷貨成本,銷貨成本 - P_COGS_ACCT,Expense,Debit,Yes,,P_COGS_ACCT,51
+5112,進貨,進貨 - P_EXPENSE_ACCT,Expense,Debit,Yes,,P_EXPENSE_ACCT,51
+5113,進貨退出,進貨退出,Expense,Debit,Yes,,,51
+5114,進貨折讓,進貨折讓 - P_TRADEDISCOUNTREC_ACCT,Expense,Debit,Yes,,P_TRADEDISCOUNTREC_ACCT,51
+5115,進貨運費,進貨運費 - P_FREIGHT_ACCT,Expense,Debit,Yes,,P_FREIGHT_ACCT,51
+52,製造成本,製造成本類,Expense,,,Yes,,5
+5211,直接原料,直接原料 - P_COSTOFPRODUCTION_ACCT,Expense,Debit,Yes,,P_COSTOFPRODUCTION_ACCT,52
+5212,直接人工,直接人工 - P_LABOR_ACCT,Expense,Debit,Yes,,P_LABOR_ACCT,52
+5213,製造費用,製造費用 - P_BURDEN_ACCT,Expense,Debit,Yes,,P_BURDEN_ACCT,52
+5214,成本差異,成本差異 - P_PURCHASEPRICEVARIANCE_ACCT,Expense,Debit,Yes,,P_PURCHASEPRICEVARIANCE_ACCT,52
+6,營業費用,營業費用類科目,Expense,,,Yes,,
+61,推銷費用,推銷費用類,Expense,,,Yes,,6
+6111,薪資費用-推銷,薪資費用-推銷,Expense,Debit,Yes,,,61
+6112,廣告費,廣告費,Expense,Debit,Yes,,,61
+6113,運費,運費,Expense,Debit,Yes,,,61
+6119,其他推銷費用,其他推銷費用,Expense,Debit,Yes,,,61
+62,管理費用,管理費用類,Expense,,,Yes,,6
+6211,薪資費用-管理,薪資費用-管理,Expense,Debit,Yes,,,62
+6212,租金費用,租金費用,Expense,Debit,Yes,,,62
+6213,文具用品,文具用品,Expense,Debit,Yes,,,62
+6214,水電費,水電費,Expense,Debit,Yes,,,62
+6215,保險費,保險費,Expense,Debit,Yes,,,62
+6216,折舊費用,折舊費用,Expense,Debit,Yes,,,62
+6217,呆帳費用,呆帳費用,Expense,Debit,Yes,,,62
+6218,稅捐,稅捐 - T_EXPENSE_ACCT,Expense,Debit,Yes,,T_EXPENSE_ACCT,62
+6219,其他管理費用,其他管理費用 - CH_EXPENSE_ACCT,Expense,Debit,Yes,,CH_EXPENSE_ACCT,62
+7,營業外收支,營業外收支類科目,Expense,,,Yes,,
+71,營業外收入,營業外收入類,Revenue,,,Yes,,7
+7111,利息收入,利息收入 - B_INTERESTREV_ACCT,Revenue,Credit,Yes,,B_INTERESTREV_ACCT,71
+7112,股利收入,股利收入,Revenue,Credit,Yes,,,71
+7113,租金收入,租金收入,Revenue,Credit,Yes,,,71
+7114,兌換利益,兌換利益 - UNREALIZEDGAIN_ACCT,Revenue,Credit,Yes,,UNREALIZEDGAIN_ACCT,71
+7115,處分資產利益,處分資產利益,Revenue,Credit,Yes,,,71
+7119,其他營業外收入,其他營業外收入 - CH_REVENUE_ACCT,Revenue,Credit,Yes,,CH_REVENUE_ACCT,71
+72,營業外費用,營業外費用類,Expense,,,Yes,,7
+7211,利息費用,利息費用 - B_INTERESTEXP_ACCT,Expense,Debit,Yes,,B_INTERESTEXP_ACCT,72
+7212,兌換損失,兌換損失 - UNREALIZEDLOSS_ACCT,Expense,Debit,Yes,,UNREALIZEDLOSS_ACCT,72
+7213,處分資產損失,處分資產損失 - P_SCRAP_ACCT,Expense,Debit,Yes,,P_SCRAP_ACCT,72
+7219,其他營業外費用,其他營業外費用,Expense,Debit,Yes,,,72
+8,所得稅費用,所得稅費用類科目,Expense,,,Yes,,
+8111,所得稅費用,所得稅費用,Expense,Debit,Yes,,,8
