@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: iDempiere Taiwan Sample Client
 Bundle-SymbolicName: tw.idempiere.sample;singleton:=true
-Bundle-Version: 2.1.3.qualifier
+Bundle-Version: 2.1.4.qualifier
 Bundle-Activator: tw.idempiere.sample.Activator
 Bundle-Vendor: Taiwan iDempiere Community
 Bundle-RequiredExecutionEnvironment: JavaSE-17

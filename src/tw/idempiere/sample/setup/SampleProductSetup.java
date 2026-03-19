@@ -253,6 +253,10 @@ public class SampleProductSetup {
      * 從 ITEMS、SERVICES、BOMS 資料中動態收集所有使用的單位，
      * 然後查詢或建立對應的 UOM。
      * </p>
+     * <p>
+     * 重要：所有 UOM 都使用系統預設的 EA (Each)，避免建立新 UOM 導致的交易問題。
+     * 中文單位名稱僅作為商品的描述，實際計量使用 EA。
+     * </p>
      *
      * @param ctx 系統上下文
      * @param trxName 交易名稱
@@ -261,7 +265,31 @@ public class SampleProductSetup {
     private static boolean setupUOMs(Properties ctx, String trxName) {
         log.info("設定計量單位...");
 
-        // 收集所有使用的單位
+        // 取得系統預設的 EA (Each) UOM
+        // 這是最穩定的方式，避免建立新 UOM 導致的交易和緩存問題
+        int eaUomId = DB.getSQLValue(null,
+            "SELECT C_UOM_ID FROM C_UOM WHERE AD_Client_ID = 0 AND X12DE355 = 'Ea'");
+
+        if (eaUomId <= 0) {
+            // 嘗試其他常見的 EA 標識
+            eaUomId = DB.getSQLValue(null,
+                "SELECT C_UOM_ID FROM C_UOM WHERE AD_Client_ID = 0 AND (X12DE355 = 'EA' OR UOMSymbol = 'Ea' OR Name = 'Each')");
+        }
+
+        if (eaUomId <= 0) {
+            // 取得任何系統級 UOM 作為備用
+            eaUomId = DB.getSQLValue(null,
+                "SELECT MIN(C_UOM_ID) FROM C_UOM WHERE AD_Client_ID = 0 AND IsActive = 'Y'");
+        }
+
+        if (eaUomId <= 0) {
+            log.severe("找不到任何系統級 UOM");
+            return false;
+        }
+
+        log.info("使用系統預設 UOM ID: " + eaUomId);
+
+        // 收集所有使用的單位符號，全部映射到 EA
         Set<String> uomSymbols = new HashSet<>();
 
         // 從 ITEMS 收集（索引 3 是單位）
@@ -279,70 +307,13 @@ public class SampleProductSetup {
             uomSymbols.add((String) data[2]);
         }
 
-        // 單位中文名稱對照
-        Map<String, String> uomNames = new HashMap<>();
-        uomNames.put("包", "包");
-        uomNames.put("箱", "箱");
-        uomNames.put("本", "本");
-        uomNames.put("支", "支");
-        uomNames.put("個", "個");
-        uomNames.put("盒", "盒");
-        uomNames.put("台", "台");
-        uomNames.put("把", "把");
-        uomNames.put("捲", "捲");
-        uomNames.put("次", "次");
-        uomNames.put("組", "組");
-
-        // 取得當前 Client ID
-        int clientId = Env.getAD_Client_ID(ctx);
-
-        // 設定每個 UOM
+        // 所有單位都使用 EA
         for (String symbol : uomSymbols) {
-            String name = uomNames.getOrDefault(symbol, symbol);
-
-            // 優先查詢系統級別的 UOM（AD_Client_ID = 0），使用無交易以確保能看到剛建立的
-            String sql = "SELECT C_UOM_ID FROM C_UOM WHERE AD_Client_ID = 0 AND (UOMSymbol = ? OR X12DE355 = ? OR Name = ?)";
-            int uomId = DB.getSQLValue(null, sql, symbol, symbol, name);
-
-            if (uomId <= 0) {
-                // 建立新 UOM（使用系統級別 AD_Client_ID=0，無交易以確保立即可見）
-                // 保存原始 context 值
-                int originalClientId = Env.getAD_Client_ID(ctx);
-
-                try {
-                    // 設定為系統級別
-                    Env.setContext(ctx, Env.AD_CLIENT_ID, 0);
-
-                    MUOM uom = new MUOM(ctx, 0, null);  // 使用 null 交易，立即提交
-                    uom.setAD_Org_ID(0);
-                    uom.setUOMSymbol(symbol);
-                    uom.setX12DE355(symbol);
-                    uom.setName(name);
-
-                    if (!uom.save()) {
-                        log.warning("無法儲存 UOM: " + name + "，使用系統預設 EA");
-                        // 使用系統預設的 EA
-                        uomId = DB.getSQLValue(null, "SELECT C_UOM_ID FROM C_UOM WHERE X12DE355 = 'EA'");
-                        if (uomId <= 0) {
-                            log.severe("找不到系統預設 UOM (EA)");
-                            return false;
-                        }
-                    } else {
-                        uomId = uom.getC_UOM_ID();
-                        log.fine("已建立系統級 UOM: " + symbol + " - " + name + " (ID=" + uomId + ")");
-                    }
-                } finally {
-                    // 恢復原始 context
-                    Env.setContext(ctx, Env.AD_CLIENT_ID, originalClientId);
-                }
-            } else {
-                log.fine("使用現有 UOM: " + symbol);
-            }
-
-            uomMap.put(symbol, uomId);
+            uomMap.put(symbol, eaUomId);
+            log.fine("單位 '" + symbol + "' 映射到 EA (ID=" + eaUomId + ")");
         }
 
-        log.info("UOM 設定完成，共 " + uomMap.size() + " 個");
+        log.info("UOM 設定完成，所有 " + uomMap.size() + " 個單位都使用 EA");
         return true;
     }
 
