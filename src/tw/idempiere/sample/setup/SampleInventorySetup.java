@@ -104,7 +104,7 @@ public class SampleInventorySetup {
 
             // 取得台北主倉
             int warehouseId = DB.getSQLValue(trxName,
-                "SELECT M_Warehouse_ID FROM M_Warehouse WHERE AD_Client_ID=? AND Value='WH-TAIPEI'",
+                "SELECT M_Warehouse_ID FROM M_Warehouse WHERE AD_Client_ID=? AND Value='WH-TP'",
                 clientId);
 
             if (warehouseId <= 0) {

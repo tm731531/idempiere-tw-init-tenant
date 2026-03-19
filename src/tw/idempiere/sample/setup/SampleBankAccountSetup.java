@@ -96,7 +96,8 @@ public class SampleBankAccountSetup {
             ba.setAD_Org_ID(orgId);
             ba.setC_Bank_ID(bankId);
             ba.setAccountNo(accountNo);
-            ba.setDescription("天地人實業有限公司 台幣帳戶");
+            ba.setName("台灣銀行 台幣帳戶");
+            ba.setDescription("天地人實業有限公司 主要營運帳戶");
             ba.setC_Currency_ID(currencyId);
             ba.setBankAccountType(MBankAccount.BANKACCOUNTTYPE_Checking);
             ba.setIsDefault(true);
