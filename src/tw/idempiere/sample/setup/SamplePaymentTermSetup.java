@@ -100,8 +100,11 @@ public class SamplePaymentTermSetup {
                 pt.setValue(value);
                 pt.setName(name);
                 pt.setNetDays(netDays);
+                pt.setGraceDays(0);  // 寬限天數（NOT NULL）
                 pt.setDiscount(new java.math.BigDecimal(discountPercent));
                 pt.setDiscountDays(discountDays);
+                pt.setDiscount2(java.math.BigDecimal.ZERO);  // 第二階段折扣（NOT NULL）
+                pt.setDiscountDays2(0);  // 第二階段折扣天數（NOT NULL）
                 pt.setIsValid(true);
 
                 // 現金設為預設

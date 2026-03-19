@@ -138,13 +138,16 @@ public class SampleInventorySetup {
             inventory.setDescription("初始庫存設定 - 台灣示範資料");
             inventory.setMovementDate(new Timestamp(System.currentTimeMillis()));
 
-            // 取得實體盤點單據類型
+            // 取得實體盤點單據類型（NOT NULL）
             int docTypeId = DB.getSQLValue(trxName,
                 "SELECT C_DocType_ID FROM C_DocType WHERE AD_Client_ID=? AND DocBaseType='MMI' AND IsActive='Y'",
                 clientId);
-            if (docTypeId > 0) {
-                inventory.setC_DocType_ID(docTypeId);
+            if (docTypeId <= 0) {
+                log.severe("找不到盤點單據類型 (MMI)");
+                SetupLog.logError("初始庫存", "找不到盤點單據類型", null);
+                return false;
             }
+            inventory.setC_DocType_ID(docTypeId);
 
             if (!inventory.save()) {
                 log.severe("無法建立盤點單");
@@ -178,6 +181,7 @@ public class SampleInventorySetup {
                 line.setAD_Org_ID(orgId);
                 line.setM_Locator_ID(locator.getM_Locator_ID());
                 line.setM_Product_ID(productId);
+                line.setM_AttributeSetInstance_ID(0);  // 無屬性集實例（AD_Column 標記必填）
                 line.setLine(lineNo);
 
                 // 設定數量：QtyBook=0（帳面數量）, QtyCount=實盤數量

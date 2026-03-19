@@ -95,6 +95,7 @@ public class SampleBankAccountSetup {
             MBankAccount ba = new MBankAccount(ctx, 0, trxName);
             ba.setAD_Org_ID(orgId);
             ba.setC_Bank_ID(bankId);
+            ba.setValue("TW-BANK-001");  // 銀行帳戶代碼（NOT NULL）
             ba.setAccountNo(accountNo);
             ba.setName("台灣銀行 台幣帳戶");
             ba.setDescription("天地人實業有限公司 主要營運帳戶");
@@ -102,6 +103,7 @@ public class SampleBankAccountSetup {
             ba.setBankAccountType(MBankAccount.BANKACCOUNTTYPE_Checking);
             ba.setIsDefault(true);
             ba.setCurrentBalance(Env.ZERO);
+            ba.setCreditLimit(Env.ZERO);  // 信用額度（NOT NULL，預設 0）
 
             if (!ba.save()) {
                 log.severe("無法儲存銀行帳戶");

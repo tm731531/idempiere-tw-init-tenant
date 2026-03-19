@@ -10,11 +10,13 @@ import java.sql.Timestamp;
 import java.util.Properties;
 
 import org.compiere.model.MBPartner;
+import org.compiere.model.MBPartnerLocation;
 import org.compiere.model.MOrder;
 import org.compiere.model.MOrderLine;
 import org.compiere.model.MProduct;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
+import org.compiere.util.Env;
 
 import tw.idempiere.sample.util.SetupLog;
 
@@ -125,15 +127,53 @@ public class SampleTransactionSetup {
 
             MBPartner bp = new MBPartner(ctx, bpartnerId, trxName);
 
-            // 取得採購單據類型
+            // 取得 BP 地址（C_Order.C_BPartner_Location_ID 是 NOT NULL）
+            MBPartnerLocation[] locs = bp.getLocations(false);
+            if (locs == null || locs.length == 0) {
+                log.warning("供應商沒有地址，跳過採購單: " + bp.getName());
+                return false;
+            }
+            int bpLocId = locs[0].getC_BPartner_Location_ID();
+
+            // 取得採購單據類型（NOT NULL）
             int docTypeId = DB.getSQLValue(trxName,
                 "SELECT C_DocType_ID FROM C_DocType WHERE AD_Client_ID=? AND DocBaseType='POO' AND IsSOTrx='N' AND IsActive='Y'",
                 clientId);
+            if (docTypeId <= 0) {
+                log.warning("找不到採購單據類型，跳過採購單");
+                return false;
+            }
 
-            // 取得價格表
+            // 取得價格表（NOT NULL）
             int priceListId = DB.getSQLValue(trxName,
                 "SELECT M_PriceList_ID FROM M_PriceList WHERE AD_Client_ID=? AND IsSOPriceList='N' AND IsActive='Y'",
                 clientId);
+            if (priceListId <= 0) {
+                log.warning("找不到採購價格表，跳過採購單");
+                return false;
+            }
+
+            // 取得付款條件（NOT NULL）
+            int paymentTermId = DB.getSQLValue(trxName,
+                "SELECT C_PaymentTerm_ID FROM C_PaymentTerm WHERE AD_Client_ID=? AND IsActive='Y' ORDER BY IsDefault DESC",
+                clientId);
+            if (paymentTermId <= 0) {
+                log.warning("找不到付款條件，跳過採購單");
+                return false;
+            }
+
+            // 取得業務代表（SalesRep_ID 在 AD_Column 標記為必填）
+            // 優先使用 BP 的 SalesRep，否則使用 context 中的 AD_User_ID
+            int salesRepId = bp.getSalesRep_ID();
+            if (salesRepId <= 0) {
+                salesRepId = Env.getAD_User_ID(ctx);
+            }
+            if (salesRepId <= 0) {
+                // 查詢該 Client 的任何有效使用者
+                salesRepId = DB.getSQLValue(trxName,
+                    "SELECT MIN(AD_User_ID) FROM AD_User WHERE AD_Client_ID=? AND IsActive='Y'",
+                    clientId);
+            }
 
             // 建立採購單
             MOrder po = new MOrder(ctx, 0, trxName);
@@ -141,14 +181,16 @@ public class SampleTransactionSetup {
             po.setIsSOTrx(false);
             po.setC_DocTypeTarget_ID(docTypeId);
             po.setBPartner(bp);
+            po.setC_BPartner_Location_ID(bpLocId);  // 明確設定地址（NOT NULL）
             po.setM_Warehouse_ID(warehouseId);
+            po.setM_PriceList_ID(priceListId);      // 明確設定價格表（NOT NULL）
+            po.setC_PaymentTerm_ID(paymentTermId);  // 明確設定付款條件（NOT NULL）
+            if (salesRepId > 0) {
+                po.setSalesRep_ID(salesRepId);      // 明確設定業務代表（AD_Column 標記必填）
+            }
             po.setDateOrdered(new Timestamp(System.currentTimeMillis()));
             po.setDatePromised(new Timestamp(System.currentTimeMillis() + 7 * 24 * 60 * 60 * 1000)); // +7天
             po.setDescription("示範採購單 - 辦公用品補貨");
-
-            if (priceListId > 0) {
-                po.setM_PriceList_ID(priceListId);
-            }
 
             if (!po.save()) {
                 log.warning("無法建立採購單");
@@ -194,15 +236,53 @@ public class SampleTransactionSetup {
 
             MBPartner bp = new MBPartner(ctx, bpartnerId, trxName);
 
-            // 取得銷售訂單單據類型
+            // 取得 BP 地址（C_Order.C_BPartner_Location_ID 是 NOT NULL）
+            MBPartnerLocation[] locs = bp.getLocations(false);
+            if (locs == null || locs.length == 0) {
+                log.warning("客戶沒有地址，跳過銷售訂單: " + bp.getName());
+                return false;
+            }
+            int bpLocId = locs[0].getC_BPartner_Location_ID();
+
+            // 取得銷售訂單單據類型（NOT NULL）
             int docTypeId = DB.getSQLValue(trxName,
                 "SELECT C_DocType_ID FROM C_DocType WHERE AD_Client_ID=? AND DocBaseType='SOO' AND IsSOTrx='Y' AND IsActive='Y'",
                 clientId);
+            if (docTypeId <= 0) {
+                log.warning("找不到銷售訂單單據類型，跳過銷售訂單");
+                return false;
+            }
 
-            // 取得價格表
+            // 取得價格表（NOT NULL）
             int priceListId = DB.getSQLValue(trxName,
                 "SELECT M_PriceList_ID FROM M_PriceList WHERE AD_Client_ID=? AND IsSOPriceList='Y' AND IsActive='Y'",
                 clientId);
+            if (priceListId <= 0) {
+                log.warning("找不到銷售價格表，跳過銷售訂單");
+                return false;
+            }
+
+            // 取得付款條件（NOT NULL）
+            int paymentTermId = DB.getSQLValue(trxName,
+                "SELECT C_PaymentTerm_ID FROM C_PaymentTerm WHERE AD_Client_ID=? AND IsActive='Y' ORDER BY IsDefault DESC",
+                clientId);
+            if (paymentTermId <= 0) {
+                log.warning("找不到付款條件，跳過銷售訂單");
+                return false;
+            }
+
+            // 取得業務代表（SalesRep_ID 在 AD_Column 標記為必填）
+            // 優先使用 BP 的 SalesRep，否則使用 context 中的 AD_User_ID
+            int salesRepId = bp.getSalesRep_ID();
+            if (salesRepId <= 0) {
+                salesRepId = Env.getAD_User_ID(ctx);
+            }
+            if (salesRepId <= 0) {
+                // 查詢該 Client 的任何有效使用者
+                salesRepId = DB.getSQLValue(trxName,
+                    "SELECT MIN(AD_User_ID) FROM AD_User WHERE AD_Client_ID=? AND IsActive='Y'",
+                    clientId);
+            }
 
             // 建立銷售訂單
             MOrder so = new MOrder(ctx, 0, trxName);
@@ -210,14 +290,16 @@ public class SampleTransactionSetup {
             so.setIsSOTrx(true);
             so.setC_DocTypeTarget_ID(docTypeId);
             so.setBPartner(bp);
+            so.setC_BPartner_Location_ID(bpLocId);  // 明確設定地址（NOT NULL）
             so.setM_Warehouse_ID(warehouseId);
+            so.setM_PriceList_ID(priceListId);      // 明確設定價格表（NOT NULL）
+            so.setC_PaymentTerm_ID(paymentTermId);  // 明確設定付款條件（NOT NULL）
+            if (salesRepId > 0) {
+                so.setSalesRep_ID(salesRepId);      // 明確設定業務代表（AD_Column 標記必填）
+            }
             so.setDateOrdered(new Timestamp(System.currentTimeMillis()));
             so.setDatePromised(new Timestamp(System.currentTimeMillis() + 3 * 24 * 60 * 60 * 1000)); // +3天
             so.setDescription("示範銷售訂單 - 文具採購");
-
-            if (priceListId > 0) {
-                so.setM_PriceList_ID(priceListId);
-            }
 
             if (!so.save()) {
                 log.warning("無法建立銷售訂單");
