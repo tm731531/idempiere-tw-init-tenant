@@ -138,7 +138,7 @@ wget https://github.com/tm731531/idempiere-tw-init-tenant/releases/latest/downlo
 git clone https://github.com/tm731531/idempiere-tw-init-tenant.git
 cd idempiere-tw-init-tenant
 mvn clean package
-# JAR 位於 target/tw.idempiere.sample-2.0.0-20260319-import.jar
+# JAR 位於 target/tw.idempiere.sample-2.0.0.jar
 ```
 
 #### 步驟 2：上傳到 iDempiere Server
@@ -377,4 +377,4 @@ GNU General Public License v2
 
 - **GitHub**: https://github.com/tm731531/idempiere-tw-init-tenant
 - **iDempiere 官網**: https://www.idempiere.org/
-- **iDempiere 台灣社群**: [Facebook 社團](https://www.facebook.com/groups/idempiere.taiwan)
+- **iDempiere 台灣社群**: [idempiere.tw](https://idempiere.tw)
