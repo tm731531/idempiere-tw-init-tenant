@@ -255,9 +255,22 @@ public class SampleClientSetup {
                 Env.setContext(ctx, Env.AD_CLIENT_ID, newClientId);
                 Env.setContext(ctx, Env.AD_ORG_ID, 0);
                 Env.setContext(ctx, Env.AD_USER_ID, 100);  // SuperUser
-                Env.setContext(ctx, Env.AD_ROLE_ID, 0);    // System Administrator
 
-                SetupLog.log("Context設定", "AD_Client_ID=" + newClientId + ", AD_User_ID=100");
+                // 關鍵修正：查詢該 Client 的 Admin 角色並設定到 context
+                // 這是必要的，因為 System Administrator (Role 0) 沒有權限存取新建立的 Client 資料
+                // MRole.addAccessSQL() 會根據 context 的 AD_ROLE_ID 過濾資料
+                int adminRoleId = DB.getSQLValue(null,
+                    "SELECT MIN(AD_Role_ID) FROM AD_Role WHERE AD_Client_ID = ? AND IsActive = 'Y'",
+                    newClientId);
+                if (adminRoleId > 0) {
+                    Env.setContext(ctx, Env.AD_ROLE_ID, adminRoleId);
+                    log.info("已設定 Client " + newClientId + " 的 Admin Role ID: " + adminRoleId);
+                } else {
+                    Env.setContext(ctx, Env.AD_ROLE_ID, 0);  // 備用：System Administrator
+                    log.warning("找不到 Client " + newClientId + " 的角色，使用 System Administrator");
+                }
+
+                SetupLog.log("Context設定", "AD_Client_ID=" + newClientId + ", AD_Role_ID=" + adminRoleId);
 
                 // 使用全新的交易來建立示範資料
                 // 確保不會與 MSetup 的交易混淆
@@ -664,6 +677,19 @@ public class SampleClientSetup {
         // 設定 context 為該 Client
         Env.setContext(ctx, Env.AD_CLIENT_ID, clientId);
         Env.setContext(ctx, Env.AD_ORG_ID, 0);
+
+        // 關鍵修正：查詢該 Client 的 Admin 角色並設定到 context
+        // 這是必要的，因為 System Administrator (Role 0) 沒有權限存取新建立的 Client 資料
+        // MRole.addAccessSQL() 會根據 context 的 AD_ROLE_ID 過濾資料
+        int adminRoleId = DB.getSQLValue(null,
+            "SELECT MIN(AD_Role_ID) FROM AD_Role WHERE AD_Client_ID = ? AND IsActive = 'Y'",
+            clientId);
+        if (adminRoleId > 0) {
+            Env.setContext(ctx, Env.AD_ROLE_ID, adminRoleId);
+            log.info("已設定 Client " + clientId + " 的 Admin Role ID: " + adminRoleId);
+        } else {
+            log.warning("找不到 Client " + clientId + " 的角色，使用 System Administrator (可能導致權限問題)");
+        }
 
         // 使用交易來處理資料
         String trxName = Trx.createTrxName("SampleDataFix_" + System.currentTimeMillis());
