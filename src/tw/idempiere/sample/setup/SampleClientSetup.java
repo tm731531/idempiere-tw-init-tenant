@@ -334,19 +334,55 @@ public class SampleClientSetup {
                     }
                     checkTrxStatus(trx, "5.3後");
 
-                    // 5.4 建立業務夥伴
-                    SetupLog.log("步驟 5.4", "建立業務夥伴...");
-                    if (!SampleBPSetup.createBPartners(ctx, newClientId, trxName)) {
-                        SetupLog.log("步驟 5.4", "警告：無法建立業務夥伴");
+                    // 5.4 建立付款條件
+                    SetupLog.log("步驟 5.4", "建立付款條件...");
+                    if (!SamplePaymentTermSetup.createPaymentTerms(ctx, newClientId, trxName)) {
+                        SetupLog.log("步驟 5.4", "警告：無法建立付款條件");
                     } else {
                         SetupLog.log("步驟 5.4", "完成");
                     }
                     checkTrxStatus(trx, "5.4後");
 
-                    // 5.5 建立台灣會計科目並設定 Defaults
-                    SetupLog.log("步驟 5.5", "建立台灣會計科目...");
+                    // 5.5 建立銀行帳戶
+                    SetupLog.log("步驟 5.5", "建立銀行帳戶...");
+                    if (!SampleBankAccountSetup.createBankAccounts(ctx, newClientId, trxName)) {
+                        SetupLog.log("步驟 5.5", "警告：無法建立銀行帳戶");
+                    } else {
+                        SetupLog.log("步驟 5.5", "完成");
+                    }
+                    checkTrxStatus(trx, "5.5後");
+
+                    // 5.6 建立業務夥伴（含地址和統編）
+                    SetupLog.log("步驟 5.6", "建立業務夥伴...");
+                    if (!SampleBPSetup.createBPartners(ctx, newClientId, trxName)) {
+                        SetupLog.log("步驟 5.6", "警告：無法建立業務夥伴");
+                    } else {
+                        SetupLog.log("步驟 5.6", "完成");
+                    }
+                    checkTrxStatus(trx, "5.6後");
+
+                    // 5.7 建立台灣會計科目並設定 Defaults
+                    SetupLog.log("步驟 5.7", "建立台灣會計科目...");
                     TaiwanCoASetup.createTaiwanCoA(ctx, newClientId, trxName);
-                    SetupLog.log("步驟 5.5", "完成");
+                    SetupLog.log("步驟 5.7", "完成");
+
+                    // 5.8 建立初始庫存
+                    SetupLog.log("步驟 5.8", "建立初始庫存...");
+                    if (!SampleInventorySetup.createInitialInventory(ctx, newClientId, trxName)) {
+                        SetupLog.log("步驟 5.8", "警告：無法建立初始庫存");
+                    } else {
+                        SetupLog.log("步驟 5.8", "完成");
+                    }
+                    checkTrxStatus(trx, "5.8後");
+
+                    // 5.9 建立示範交易
+                    SetupLog.log("步驟 5.9", "建立示範交易...");
+                    if (!SampleTransactionSetup.createSampleTransactions(ctx, newClientId, trxName)) {
+                        SetupLog.log("步驟 5.9", "警告：無法建立示範交易");
+                    } else {
+                        SetupLog.log("步驟 5.9", "完成");
+                    }
+                    checkTrxStatus(trx, "5.9後");
 
                     // 提交前驗證：直接使用 JDBC 查詢（不依賴 Trx）
                     SetupLog.log("提交前驗證", "開始...");
@@ -686,6 +722,14 @@ public class SampleClientSetup {
             MTaxCategory taxCategory = SampleTaxSetup.createTax(ctx, clientId, 0, trxName);
             int taxCategoryId = taxCategory != null ? taxCategory.getC_TaxCategory_ID() : 0;
 
+            // 建立付款條件
+            log.info("補建付款條件...");
+            SamplePaymentTermSetup.createPaymentTerms(ctx, clientId, trxName);
+
+            // 建立銀行帳戶
+            log.info("補建銀行帳戶...");
+            SampleBankAccountSetup.createBankAccounts(ctx, clientId, trxName);
+
             // 建立價格表
             log.info("補建價格表...");
             SamplePriceListSetup.createPriceLists(ctx, clientId, trxName);
@@ -697,9 +741,17 @@ public class SampleClientSetup {
                     SamplePriceListSetup.getPurchasePLV(),
                     trxName);
 
-            // 建立業務夥伴
+            // 建立業務夥伴（含地址和統編）
             log.info("補建業務夥伴...");
             SampleBPSetup.createBPartners(ctx, clientId, trxName);
+
+            // 建立初始庫存
+            log.info("補建初始庫存...");
+            SampleInventorySetup.createInitialInventory(ctx, clientId, trxName);
+
+            // 建立示範交易
+            log.info("補建示範交易...");
+            SampleTransactionSetup.createSampleTransactions(ctx, clientId, trxName);
 
             trx.commit();
             log.info("示範資料補建完成！");
