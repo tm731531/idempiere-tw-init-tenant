@@ -73,7 +73,7 @@
 5112,進貨,進貨 - P_EXPENSE_ACCT,Expense,Debit,Yes,,P_EXPENSE_ACCT,51
 5113,進貨退出,進貨退出,Expense,Debit,Yes,,,51
 5114,進貨折讓,進貨折讓 - P_TRADEDISCOUNTREC_ACCT,Expense,Debit,Yes,,P_TRADEDISCOUNTREC_ACCT,51
-5115,進貨運費,進貨運費 - P_FREIGHT_ACCT,Expense,Debit,Yes,,P_FREIGHT_ACCT,51
+5115,進貨運費,進貨運費,Expense,Debit,Yes,,,51
 52,製造成本,製造成本類,Expense,,,Yes,,5
 5211,直接原料,直接原料 - P_COSTOFPRODUCTION_ACCT,Expense,Debit,Yes,,P_COSTOFPRODUCTION_ACCT,52
 5212,直接人工,直接人工 - P_LABOR_ACCT,Expense,Debit,Yes,,P_LABOR_ACCT,52
