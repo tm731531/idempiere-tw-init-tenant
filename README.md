@@ -1,135 +1,380 @@
-# tw.idempiere.sample - 天地人實業示範資料插件
+# iDempiere 台灣示範資料插件
 
-iDempiere 台灣本地化示範 Client 插件。安裝後自動建立「天地人實業有限公司」示範環境，包含繁體中文的會計科目、商品、客戶/供應商等基礎主檔。
+**天地人實業有限公司 - Taiwan Sample Client Plugin**
 
-## 功能特色
+[![License: GPL v2](https://img.shields.io/badge/License-GPL%20v2-blue.svg)](https://www.gnu.org/licenses/old-licenses/gpl-2.0.html)
+[![iDempiere](https://img.shields.io/badge/iDempiere-12.0+-green.svg)](https://www.idempiere.org/)
 
-- **繁體中文**：所有資料皆為繁體中文，適合台灣使用者
-- **台灣會計科目**：採用商業會計處理準則架構
-- **完整主檔**：包含 30 種商品、15 個 BP、BOM 組合品
-- **即裝即用**：安裝插件即自動建立示範資料
-- **乾淨重置**：卸載插件自動清理所有資料
+## 為什麼需要這個插件？
 
-## 系統需求
+iDempiere 是一套功能強大的開源 ERP 系統，但對於台灣使用者來說，有幾個痛點：
 
-- iDempiere 12 或以上版本
-- Java 17
+| 問題 | 說明 |
+|------|------|
+| 🇺🇸 美國會計科目 | 預設的會計科目是美國 GAAP 標準，不符合台灣商業會計法規 |
+| 📝 沒有中文示範資料 | 學習和測試時缺乏貼近實務的範例 |
+| ⏰ 初始設定繁瑣 | 需要花費大量時間手動建立組織、倉庫、商品、客戶、供應商等基礎資料 |
+| 🌐 全英文介面 | 對於初學者有一定的學習門檻 |
 
-## 安裝方式
+**這個插件解決了以上問題**，讓你可以**一鍵建立完整的台灣示範公司**，立即開始學習或測試 iDempiere。
 
-1. 編譯插件：
-   ```bash
-   mvn clean package
-   ```
+---
 
-2. 將產生的 JAR 檔複製到 iDempiere plugins 目錄
+## 這個插件能做什麼？
 
-3. 重啟 iDempiere 或透過 OSGi Console 安裝：
-   ```
-   install file:///path/to/tw.idempiere.sample-1.0.0-SNAPSHOT.jar
-   start <bundle-id>
-   ```
+安裝後會自動建立一間完整的台灣示範公司「**天地人實業有限公司**」，包含：
 
-## 登入資訊
+### 📊 組織架構（3 個組織）
 
-安裝完成後，可使用以下帳號登入：
+| 組織 | 代碼 | 類型 | 說明 |
+|------|------|------|------|
+| 台北總公司 | HQ | 總部 | 主要營運據點 |
+| 台中分公司 | TC | 分公司 | 中部營運據點 |
+| 高雄倉庫 | KH | 倉庫 | 南部物流中心 |
 
-- **Client**: 天地人實業有限公司
-- **使用者**: SampleAdmin
-- **密碼**: Sample123!
-- **角色**: 天地人管理員
+### 🏭 倉庫（4 個倉庫）
 
-## 示範資料內容
+| 倉庫 | 所屬組織 | 用途 |
+|------|----------|------|
+| 台北主倉 | 台北總公司 | 主要存貨倉庫 |
+| 台北門市倉 | 台北總公司 | 門市銷售用 |
+| 台中倉 | 台中分公司 | 中部配送中心 |
+| 高雄倉 | 高雄倉庫 | 南部配送中心 |
 
-### 組織架構
+### 📚 台灣會計科目表（111 個科目）
 
-| 代碼 | 名稱 | 說明 |
-|------|------|------|
-| HQ | 台北總公司 | 總公司，含主要倉庫 |
-| TC | 台中分公司 | 分公司，含分公司倉庫 |
-| KH | 高雄倉庫 | 倉儲組織 |
-
-### 會計架構
-
-- 採用台灣商業會計處理準則
-- 成本法：加權平均-採購 (Average PO)
-- 成本層級：公司層級 (Client)
-- 帳期控制：手動
-- 幣別：新台幣 (TWD)
-
-### 稅務設定
-
-| 名稱 | 稅率 | 說明 |
-|------|------|------|
-| 營業稅 5% | 5% | 預設稅率 |
-| 免稅 | 0% | 出口或免稅商品 |
-
-### 商品類別
-
-- 電子產品
-- 辦公用品
-- 家具
-- 耗材
-- 服務
-- 組合品
-
-### 業務夥伴
-
-- 5 家供應商
-- 7 家客戶
-- 3 位員工
-
-## 開發說明
-
-### 專案結構
+符合台灣商業會計法規的完整會計科目，包含正確的**樹狀階層結構**：
 
 ```
-tw.idempiere.sample/
+1 資產
+├── 11 流動資產
+│   ├── 111 現金及約當現金
+│   │   ├── 1111 庫存現金
+│   │   ├── 1112 零用金
+│   │   ├── 1113 銀行存款
+│   │   └── 1114 在途現金
+│   ├── 112 短期投資
+│   ├── 113 應收票據
+│   ├── 114 應收帳款
+│   ├── 118 其他應收款
+│   └── 119 存貨
+├── 12 非流動資產
+│   └── 121 固定資產
+2 負債
+├── 21 流動負債
+│   ├── 211 短期借款
+│   ├── 212 應付票據
+│   ├── 213 應付帳款
+│   └── 214 其他應付款
+3 權益
+├── 31 股本
+├── 32 資本公積
+└── 33 保留盈餘
+4 營業收入
+├── 41 銷貨收入
+└── 42 服務收入
+5 營業成本
+├── 51 銷貨成本
+└── 52 製造成本
+6 營業費用
+├── 61 推銷費用
+└── 62 管理費用
+7 營業外收支
+├── 71 營業外收入
+└── 72 營業外費用
+8 所得稅費用
+```
+
+### 💰 稅務設定（3 種稅率）
+
+| 稅別 | 稅率 | 用途 |
+|------|------|------|
+| 應稅 5% | 5% | 一般商品/服務 |
+| 零稅率 | 0% | 外銷商品 |
+| 免稅 | 0% | 免稅商品 |
+
+### 📋 價格表（3 個價格表）
+
+| 價格表 | 用途 | 說明 |
+|--------|------|------|
+| 標準銷售價格表 | 銷售 | 一般客戶報價 |
+| 標準採購價格表 | 採購 | 供應商成本價 |
+| 員工價格表 | 內部 | 員工優惠價 |
+
+### 📦 商品（31 項商品）
+
+包含多種商品類別的示範商品：
+
+| 類別 | 商品範例 |
+|------|----------|
+| 紙類 | A4 影印紙、信封、便條紙 |
+| 書寫用品 | 原子筆、鉛筆、簽字筆 |
+| 辦公用品 | 訂書機、膠水、剪刀 |
+| 檔案用品 | 資料夾、檔案盒、標籤 |
+| 電子產品 | USB 隨身碟、滑鼠、鍵盤 |
+| 服務 | 顧問服務、維護服務 |
+
+### 👥 業務夥伴（18 個）
+
+| 類型 | 數量 | 範例 |
+|------|------|------|
+| 客戶 | 10 家 | 台北科技公司、高雄貿易行 |
+| 供應商 | 5 家 | 大同辦公用品、聯強電子 |
+| 員工 | 3 位 | 王小明、李小華 |
+
+---
+
+## 如何安裝插件？
+
+### 方法一：透過 OSGi Console（推薦）
+
+#### 步驟 1：下載 JAR 檔案
+
+```bash
+# 從 GitHub Releases 下載
+wget https://github.com/tm731531/idempiere-tw-init-tenant/releases/latest/download/tw.idempiere.sample-2.0.0.jar
+
+# 或自行編譯
+git clone https://github.com/tm731531/idempiere-tw-init-tenant.git
+cd idempiere-tw-init-tenant
+mvn clean package
+# JAR 位於 target/tw.idempiere.sample-2.0.0-20260319-import.jar
+```
+
+#### 步驟 2：上傳到 iDempiere Server
+
+```bash
+# 複製到 plugins 目錄
+scp tw.idempiere.sample-2.0.0.jar user@your-server:/opt/idempiere/plugins/
+```
+
+#### 步驟 3：透過 OSGi Console 安裝
+
+**方式 A：使用 Web Console**
+
+1. 開啟瀏覽器：`http://your-server:8080/osgi/system/console/bundles`
+2. 登入（預設：admin/admin）
+3. 點選「Install/Update」
+4. 選擇 JAR 檔案上傳
+5. 勾選「Start」
+6. 點選「Install or Update」
+
+**方式 B：使用 Telnet**
+
+```bash
+telnet localhost 12612
+# 或
+ssh -p 12612 localhost
+
+# 執行以下指令
+install file:/opt/idempiere/plugins/tw.idempiere.sample-2.0.0.jar
+# 記下回傳的 Bundle ID，例如 Bundle ID: 250
+
+start 250
+```
+
+#### 步驟 4：驗證安裝
+
+```bash
+# 在 OSGi Console 中
+lb | grep -i taiwan
+# 應該看到：250 | Active | tw.idempiere.sample
+```
+
+### 方法二：直接放入 plugins 目錄並重啟
+
+```bash
+# 複製 JAR 到 plugins 目錄
+cp tw.idempiere.sample-2.0.0.jar /opt/idempiere/plugins/
+
+# 重啟 iDempiere
+sudo systemctl restart idempiere
+```
+
+---
+
+## 安裝後會有什麼？
+
+### 自動建立的內容
+
+插件啟動後會**自動執行**以下動作（約需 30-60 秒）：
+
+1. ✅ 建立 Client「天地人實業有限公司」
+2. ✅ 建立 3 個組織（台北總公司、台中分公司、高雄倉庫）
+3. ✅ 建立 4 個倉庫
+4. ✅ 匯入 111 個台灣會計科目（含樹狀階層）
+5. ✅ 建立稅務設定（應稅、零稅率、免稅）
+6. ✅ 建立 3 個價格表
+7. ✅ 建立 31 項商品
+8. ✅ 建立 18 個業務夥伴
+9. ✅ 設定會計架構（成本法、帳期等）
+
+### 登入資訊
+
+| 項目 | 值 |
+|------|-----|
+| **Client** | 天地人實業有限公司 |
+| **管理員帳號** | SampleAdmin |
+| **一般用戶帳號** | SampleUser |
+| **初始密碼** | （查看 iDempiere server.log） |
+
+### 登入步驟
+
+1. 開啟 iDempiere WebUI：`http://your-server:8080/webui/`
+2. 輸入帳號密碼
+3. 選擇 Client：天地人實業有限公司
+4. 選擇組織：台北總公司（或其他）
+5. 選擇角色：管理員
+6. 開始使用！
+
+---
+
+## 後續如何使用 ERP？
+
+有了示範資料，你可以立即練習 ERP 的核心流程：
+
+### 🛒 採購流程
+
+```
+採購申請 → 採購單 → 收貨 → 供應商發票 → 付款
+```
+
+| 步驟 | 操作 | 說明 |
+|------|------|------|
+| 1 | 建立採購單 | Menu → Purchase → Purchase Order |
+| 2 | 選擇供應商 | 如：大同辦公用品 |
+| 3 | 選擇商品 | 如：A4 影印紙，價格自動帶入 |
+| 4 | 完成採購單 | 點選「Complete」 |
+| 5 | 收貨 | 從採購單產生收貨單，選擇倉庫 |
+| 6 | 供應商發票 | 從收貨單產生發票 |
+| 7 | 付款 | 建立付款單沖銷應付帳款 |
+
+### 💼 銷售流程
+
+```
+報價單 → 銷售訂單 → 出貨 → 客戶發票 → 收款
+```
+
+| 步驟 | 操作 | 說明 |
+|------|------|------|
+| 1 | 建立銷售訂單 | Menu → Sales → Sales Order |
+| 2 | 選擇客戶 | 如：台北科技公司 |
+| 3 | 選擇商品 | 價格自動從價格表帶入 |
+| 4 | 完成訂單 | 點選「Complete」 |
+| 5 | 出貨 | 從訂單產生出貨單 |
+| 6 | 客戶發票 | 從出貨單產生發票 |
+| 7 | 收款 | 建立收款單沖銷應收帳款 |
+
+### 📊 庫存管理
+
+| 功能 | 路徑 | 說明 |
+|------|------|------|
+| 庫存查詢 | Material Management → Storage Detail | 查看各倉庫即時庫存 |
+| 庫存調撥 | Material Management → Movement | 在倉庫間移動商品 |
+| 庫存盤點 | Material Management → Physical Inventory | 實體盤點並調整差異 |
+
+### 📈 會計作業
+
+| 功能 | 路徑 | 說明 |
+|------|------|------|
+| 傳票查詢 | Accounting → Journal Entries | 查看自動產生的會計傳票 |
+| 科目餘額 | Accounting → Account Balance | 查看各科目餘額 |
+| 試算表 | Accounting → Trial Balance | 產生試算表 |
+| 財務報表 | Accounting → Financial Report | 資產負債表、損益表 |
+
+---
+
+## 有沒有這個插件的差別？
+
+| 項目 | ❌ 沒有插件 | ✅ 有插件 |
+|------|------------|----------|
+| **會計科目** | 美國 GAAP 標準（英文） | 台灣商業會計法規（中文） |
+| **會計科目樹** | 英文科目名稱 | 中文，樹狀階層清楚 |
+| **示範資料** | 無 | 完整的公司、商品、客戶、供應商 |
+| **稅務設定** | 需要手動設定 | 已設定台灣常用稅率 |
+| **價格表** | 需要手動建立 | 現成的銷售/採購價格表 |
+| **學習曲線** | 需花大量時間建立基礎資料 | 立即開始學習 ERP 流程 |
+| **測試環境** | 需手動建立測試資料 | 現成的測試資料 |
+| **上手時間** | 數小時～數天 | **5 分鐘** |
+
+### 適用對象
+
+| 對象 | 用途 |
+|------|------|
+| 🎓 **ERP 學習者** | 快速建立學習環境，專注於流程學習 |
+| 💼 **系統導入顧問** | 展示 iDempiere 功能給客戶 |
+| 👨‍💻 **開發人員** | 測試客製化功能 |
+| 🏢 **企業評估者** | 評估 iDempiere 是否適合企業需求 |
+| 📚 **教育訓練** | ERP 課程教學使用 |
+
+---
+
+## 技術規格
+
+| 項目 | 需求 |
+|------|------|
+| iDempiere 版本 | 12.0.0+ |
+| Java 版本 | 17+ |
+| 資料庫 | PostgreSQL 14+ / Oracle |
+| 授權 | GPL v2 |
+
+## 專案結構
+
+```
+idempiere-tw-init-tenant/
 ├── src/tw/idempiere/sample/
-│   ├── Activator.java              # OSGi 生命週期管理
-│   ├── data/                       # 資料定義
-│   │   ├── BPartnerData.java       # BP 資料
-│   │   ├── ChartOfAccountsTW.java  # 台灣會計科目
-│   │   ├── OrganizationData.java   # 組織資料
-│   │   └── ProductData.java        # 商品資料
-│   ├── setup/                      # 建立邏輯
+│   ├── Activator.java              # OSGi 啟動器
+│   ├── setup/
 │   │   ├── SampleClientSetup.java  # 主流程控制
-│   │   ├── SampleOrgSetup.java     # 組織建立
-│   │   ├── SampleCalendarSetup.java# 會計年度
-│   │   ├── SampleAccountingSetup.java # 會計架構
+│   │   ├── TaiwanCoASetup.java     # 台灣會計科目（Import 機制）
+│   │   ├── SampleOrgSetup.java     # 組織和倉庫
 │   │   ├── SampleTaxSetup.java     # 稅務設定
 │   │   ├── SamplePriceListSetup.java # 價格表
-│   │   ├── SampleBPSetup.java      # 業務夥伴
-│   │   └── SampleProductSetup.java # 商品
-│   └── cleanup/                    # 清理邏輯
-│       └── SampleClientCleanup.java
-├── META-INF/MANIFEST.MF
-├── OSGI-INF/component.xml
-└── pom.xml
+│   │   ├── SampleProductSetup.java # 商品
+│   │   └── SampleBPSetup.java      # 業務夥伴
+│   └── util/
+│       └── SetupLog.java           # 日誌工具
+├── data/
+│   └── Accounting_tw.csv           # 台灣會計科目表
+├── META-INF/
+│   └── MANIFEST.MF                 # OSGi Bundle 設定
+├── OSGI-INF/
+│   └── component.xml               # DS 元件定義
+└── pom.xml                         # Maven 建置設定
 ```
 
-### 建立流程
+---
 
-插件啟動時會依序執行：
+## 常見問題
 
-1. 建立 Client（天地人實業有限公司）
-2. 建立組織和倉庫
-3. 建立會計年度和帳期
-4. 建立會計架構和科目
-5. 建立稅務設定
-6. 建立價格表
-7. 建立業務夥伴
-8. 建立商品和 BOM
-9. 建立管理員角色和用戶
+### Q: 安裝後沒有看到示範資料？
 
-### 清理流程
+A: 請檢查 iDempiere server.log，搜尋 `[TW-Sample]` 查看建立過程的日誌。
 
-卸載插件時會依相依性順序刪除所有資料，確保不會有 FK 違反。
+### Q: 可以建立多個示範 Client 嗎？
 
-## 授權條款
+A: 目前插件只會建立一個「天地人實業有限公司」。如需多個，請修改 `SampleClientSetup.java` 中的 `CLIENT_NAME`。
 
-GNU General Public License version 2
+### Q: 如何移除示範資料？
 
-## 貢獻者
+A: 目前需要手動刪除 Client。未來版本將提供清理功能。
 
-Taiwan iDempiere Community
+### Q: 會計科目可以自訂嗎？
+
+A: 可以修改 `data/Accounting_tw.csv` 後重新編譯。
+
+---
+
+## 貢獻
+
+歡迎提交 Issue 和 Pull Request！
+
+## 授權
+
+GNU General Public License v2
+
+## 相關連結
+
+- **GitHub**: https://github.com/tm731531/idempiere-tw-init-tenant
+- **iDempiere 官網**: https://www.idempiere.org/
+- **iDempiere 台灣社群**: [Facebook 社團](https://www.facebook.com/groups/idempiere.taiwan)
