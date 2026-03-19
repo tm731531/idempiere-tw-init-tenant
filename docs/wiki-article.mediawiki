@@ -1,0 +1,178 @@
+= Taiwan Sample Client Plugin =
+
+'''Taiwan Sample Client Plugin''' (tw.idempiere.sample) is an OSGi plugin that creates a complete Taiwan demo company with localized Chart of Accounts, sample products, business partners, and tax settings.
+
+== Overview ==
+
+This plugin solves common challenges for Taiwan iDempiere users:
+
+{| class="wikitable"
+|-
+! Challenge !! Solution
+|-
+| Default US GAAP Chart of Accounts || Taiwan Commercial Accounting Law compliant accounts (111 accounts)
+|-
+| No Chinese sample data || Complete demo company "天地人實業有限公司" (Tian Di Ren Enterprise Co., Ltd.)
+|-
+| Time-consuming initial setup || One-click setup for organizations, warehouses, products, and business partners
+|}
+
+== Features ==
+
+=== Organizations (3) ===
+* '''台北總公司''' (Taipei HQ) - Main headquarters
+* '''台中分公司''' (Taichung Branch) - Central region operations
+* '''高雄倉庫''' (Kaohsiung Warehouse) - Southern logistics center
+
+=== Warehouses (4) ===
+* Taipei Main Warehouse
+* Taipei Store Warehouse
+* Taichung Warehouse
+* Kaohsiung Warehouse
+
+=== Taiwan Chart of Accounts (111 accounts) ===
+
+The plugin imports a complete Taiwan-standard Chart of Accounts with proper tree hierarchy:
+
+<pre>
+1 Assets (資產)
+├── 11 Current Assets (流動資產)
+│   ├── 111 Cash and Cash Equivalents (現金及約當現金)
+│   ├── 112 Short-term Investments (短期投資)
+│   ├── 113 Notes Receivable (應收票據)
+│   ├── 114 Accounts Receivable (應收帳款)
+│   └── 119 Inventory (存貨)
+├── 12 Non-current Assets (非流動資產)
+2 Liabilities (負債)
+├── 21 Current Liabilities (流動負債)
+3 Equity (權益)
+4 Operating Revenue (營業收入)
+5 Operating Costs (營業成本)
+6 Operating Expenses (營業費用)
+7 Non-operating Income/Expenses (營業外收支)
+8 Income Tax Expense (所得稅費用)
+</pre>
+
+=== Tax Settings (3) ===
+{| class="wikitable"
+|-
+! Tax Name !! Rate !! Usage
+|-
+| 應稅 5% (Taxable) || 5% || Standard goods/services
+|-
+| 零稅率 (Zero-rated) || 0% || Export goods
+|-
+| 免稅 (Exempt) || 0% || Tax-exempt goods
+|}
+
+=== Price Lists (3) ===
+* Standard Sales Price List
+* Standard Purchase Price List
+* Employee Price List
+
+=== Products (31) ===
+Sample products across categories:
+* Paper products (A4 paper, envelopes)
+* Writing supplies (pens, pencils)
+* Office supplies (staplers, scissors)
+* Filing supplies (folders, binders)
+* Electronics (USB drives, mouse, keyboard)
+* Services (consulting, maintenance)
+
+=== Business Partners (18) ===
+* 10 Customers
+* 5 Vendors
+* 3 Employees
+
+== Requirements ==
+
+{| class="wikitable"
+|-
+! Component !! Version
+|-
+| iDempiere || 12.0.0+
+|-
+| Java || 17+
+|-
+| Database || PostgreSQL 14+ / Oracle
+|}
+
+== Installation ==
+
+=== Download ===
+
+Download the JAR from GitHub Releases:
+* https://github.com/tm731531/idempiere-tw-init-tenant/releases
+
+=== Install via OSGi Console ===
+
+'''Option A: Web Console'''
+# Open browser: <code>http://your-server:8080/osgi/system/console/bundles</code>
+# Login (default: admin/admin)
+# Click "Install/Update"
+# Select the JAR file
+# Check "Start"
+# Click "Install or Update"
+
+'''Option B: Telnet/SSH'''
+<syntaxhighlight lang="bash">
+telnet localhost 12612
+
+# Install and start
+install file:/opt/idempiere/plugins/tw.idempiere.sample-2.0.0.jar
+start <bundle-id>
+</syntaxhighlight>
+
+=== Verify Installation ===
+
+<syntaxhighlight lang="bash">
+# In OSGi Console
+lb | grep -i taiwan
+# Should show: Active | tw.idempiere.sample
+</syntaxhighlight>
+
+== Post-Installation ==
+
+After the plugin starts, it automatically creates:
+# Client "天地人實業有限公司"
+# 3 Organizations
+# 4 Warehouses
+# 111 Taiwan Chart of Accounts (with tree hierarchy)
+# Tax settings
+# 3 Price Lists
+# 31 Products
+# 18 Business Partners
+
+=== Login Credentials ===
+
+{| class="wikitable"
+|-
+! Item !! Value
+|-
+| Client || 天地人實業有限公司
+|-
+| Admin User || SampleAdmin
+|-
+| Standard User || SampleUser
+|-
+| Password || (Check server.log)
+|}
+
+== Source Code ==
+
+* '''GitHub''': https://github.com/tm731531/idempiere-tw-init-tenant
+* '''License''': GPL v2
+
+== See Also ==
+
+* [[Chart of Accounts]]
+* [[Creating a new Client]]
+* [[OSGi Plugin Development]]
+
+== External Links ==
+
+* [https://www.idempiere.tw iDempiere Taiwan Community]
+
+[[Category:Plugins]]
+[[Category:Localization]]
+[[Category:Taiwan]]
