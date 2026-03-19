@@ -49,7 +49,14 @@
 2143,應付利息,應付利息,Liability,Credit,Yes,,,214
 2144,銷項稅額,銷項稅額 - T_DUE_ACCT,Liability,Credit,Yes,,T_DUE_ACCT,214
 2145,預收款項,預收款項 - C_PREPAYMENT_ACCT,Liability,Credit,Yes,,C_PREPAYMENT_ACCT,214
+2146,應付勞保費,應付勞保費-公司負擔部分,Liability,Credit,Yes,,,214
+2147,應付健保費,應付健保費-公司負擔部分,Liability,Credit,Yes,,,214
+2148,應付勞退金,應付勞退金-6%提撥,Liability,Credit,Yes,,,214
 2149,其他應付款-其他,其他應付款-其他,Liability,Credit,Yes,,,214
+215,代扣款項,代扣款項類,Liability,,,Yes,,21
+2151,代扣所得稅,代扣員工薪資所得稅,Liability,Credit,Yes,,,215
+2152,代扣勞保費,代扣員工自付勞保費,Liability,Credit,Yes,,,215
+2153,代扣健保費,代扣員工自付健保費,Liability,Credit,Yes,,,215
 3,權益,權益類科目,Owner's Equity,,,Yes,,
 31,股本,股本類,Owner's Equity,,,Yes,,3
 3111,普通股股本,普通股股本,Owner's Equity,Credit,Yes,,,31
@@ -88,6 +95,14 @@
 62,管理費用,管理費用類,Expense,,,Yes,,6
 6211,薪資費用-管理,薪資費用-管理,Expense,Debit,Yes,,,62
 6212,租金費用,租金費用,Expense,Debit,Yes,,,62
+622,人事費用,人事費用類,Expense,,,Yes,,62
+6221,勞保費用,勞保費用-公司負擔,Expense,Debit,Yes,,,622
+6222,健保費用,健保費用-公司負擔,Expense,Debit,Yes,,,622
+6223,勞退費用,勞退費用-6%提撥,Expense,Debit,Yes,,,622
+6224,加班費,加班費,Expense,Debit,Yes,,,622
+6225,獎金,獎金-年終及績效,Expense,Debit,Yes,,,622
+6226,員工福利,員工福利費用,Expense,Debit,Yes,,,622
+6227,伙食費,伙食費-每月2400免稅,Expense,Debit,Yes,,,622
 6213,文具用品,文具用品,Expense,Debit,Yes,,,62
 6214,水電費,水電費,Expense,Debit,Yes,,,62
 6215,保險費,保險費,Expense,Debit,Yes,,,62
