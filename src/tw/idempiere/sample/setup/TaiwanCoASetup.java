@@ -344,17 +344,23 @@ public class TaiwanCoASetup {
         SetupLog.log("ImportProcess", "開始執行 ImportAccount 流程...");
 
         try {
-            // 取得 ImportAccount 流程 ID
-            int processId = MProcess.getProcess_ID("ImportAccount", trxName);
+            // 取得 Import Account 流程 ID
+            // 注意：流程 Value = 'Import_Account', Name = 'Import Accounts'
+            int processId = MProcess.getProcess_ID("Import_Account", trxName);
             if (processId <= 0) {
                 // 嘗試用 Value 查詢
                 processId = DB.getSQLValue(trxName,
-                    "SELECT AD_Process_ID FROM AD_Process WHERE Value='ImportAccount'");
+                    "SELECT AD_Process_ID FROM AD_Process WHERE Value='Import_Account'");
             }
             if (processId <= 0) {
-                // 備用：直接用已知的 Process ID（通常是 189）
+                // 備用：用 Name 查詢
                 processId = DB.getSQLValue(trxName,
-                    "SELECT AD_Process_ID FROM AD_Process WHERE Name='Import Account'");
+                    "SELECT AD_Process_ID FROM AD_Process WHERE Name='Import Accounts'");
+            }
+            if (processId <= 0) {
+                // 最後備用：用 Classname 查詢
+                processId = DB.getSQLValue(trxName,
+                    "SELECT AD_Process_ID FROM AD_Process WHERE Classname='org.compiere.process.ImportAccount'");
             }
 
             SetupLog.log("ImportProcess", "Process ID = " + processId);
